@@ -1,1 +1,13 @@
-C:\Users\jchay\Documents\0-PROJET-FIL-ROUGE\JAVA\MovieManagerIAM\src\main\java\com\bcefit\Main.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/security/SecurityConstants.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/security/UserDetailServiceImpl.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/exposition/UserLoginDataController.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/application/UserLoginDataServiceImpl.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/security/JWTAuthenticationFilter.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/infrastructure/IUserLoginDataRepository.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/Main.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/domaine/HashAlgo.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/application/MapperUserLoginData.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/dto/UserLoginDataDto.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/application/IUserLoginDataService.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/domaine/UserLoginData.java
+/Users/wagblin/app/MovieManagerIAM/src/main/java/com/bcefit/configuration/SecurityConfiguration.java
