@@ -1,0 +1,125 @@
+# This workflow will build a Java project with Maven, and cache/restore any dependencies to improve the workflow execution time
+# For more information see: https://docs.github.com/en/actions/automating-builds-and-tests/building-and-testing-java-with-maven
+
+# This workflow uses actions that are not certified by GitHub.
+# They are provided by a third-party and are governed by
+# separate terms of service, privacy policy, and support
+# documentation.
+# SONAR TOKEN créé
+
+name: CI/CD Serveur IAM
+
+on:
+  push:
+    branches: [ "develop" ]
+
+env:
+  REGISTRY: ghcr.io
+  IMAGE_NAME: ${{ github.repository }}
+
+jobs:
+  ####################
+  ## ANALYSE SONAR ##
+  ###################
+#  quality-gates:
+#
+#    runs-on: ubuntu-latest
+#
+#    steps:
+#    - uses: actions/checkout@v3
+#      with:
+#        fetch-depth: 0
+#    - name: Set up JDK 17
+#      uses: actions/setup-java@v3
+#      with:
+#        java-version: '17'
+#        distribution: 'temurin'
+#        cache: maven
+#    - name: Sonar Cloud Analysis
+#      env:
+#        GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+#        SONAR_TOKEN: ${{ secrets.SONAR_TOKEN }}
+#      run: mvn verify sonar:sonar
+
+  ###############
+  ## BUILD JAR ##
+  ###############
+  build_jar:
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Set up JDK 17
+        uses: actions/setup-java@v3
+        with:
+          java-version: '17'
+          distribution: 'temurin'
+          cache: maven
+      - name: Create env file
+        run: |
+          echo "${{ secrets.ENV_FILE_IAM }}" > ./src/main/resources/env.properties
+
+      - name: Build Maven
+        run: mvn clean package
+
+      - run: mkdir artifact && cp target/*.jar artifact
+      - uses: actions/upload-artifact@v3
+        with:
+            name: movie-manager-iam
+            path: artifact
+            retention-days: 1
+
+
+#      - name: Publish package
+#        run: mvn deploy
+#        env:
+#          GITHUB_TOKEN: ${{ secrets.GITHUB_TOKEN }}
+
+  ########################
+  ## BUILD IMAGE DOCKER ##
+  ########################
+  build_docker_image:
+    needs: build_jar
+    runs-on: ubuntu-latest
+    permissions:
+      contents: read
+      packages: write
+
+    steps:
+      - uses: actions/checkout@v3
+      - name: Recuperation de l'artefact
+        uses: actions/download-artifact@v3
+        with:
+          name: movie-manager-iam
+
+      - name: Build and push Docker image
+        uses: mr-smithers-excellent/docker-build-push@v5
+        with:
+            image: movie-manager-iam
+            tags: latest
+            registry: ghcr.io
+            username: ${{ github.actor }}
+            password: ${{ secrets.GITHUB_TOKEN }}
+
+  #######################################
+  ## PULL IMAGE DOCKER & RUN CONTAINER ##
+  #######################################
+  run_docker_container:
+    needs: build_docker_image
+    runs-on: ubuntu-latest
+
+    steps:
+      - name: connexion SSH à VM
+        uses: appleboy/ssh-action@v0.1.7
+        with:
+          host: ${{ secrets.SSH_HOST_BACKEND }}
+          username: ${{ secrets.SSH_USERNAME }}
+          key: ${{ secrets.SSH_BACKEND_KEY }}
+          port: ${{ secrets.SSH_PORT }}
+          script: |
+            docker pull ghcr.io/moviedbteam/movie-manager-iam:latest
+            docker stop iam
+            docker run --rm -d -ti --name iam -p 8081:8081 ghcr.io/moviedbteam/movie-manager-iam:latest
