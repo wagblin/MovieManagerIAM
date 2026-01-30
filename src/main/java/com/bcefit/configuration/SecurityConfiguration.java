@@ -41,10 +41,11 @@ public class SecurityConfiguration {
     @Bean
     public SecurityFilterChain filterChain(HttpSecurity http) throws Exception {
 
-        http.cors();
+        http.cors(cors -> {});
 
-        http.authorizeRequests().antMatchers("/login","/api/iam/*").permitAll()
-                .anyRequest().authenticated();
+        http.authorizeHttpRequests(authz -> authz
+                .requestMatchers("/login","/api/iam/*").permitAll()
+                .anyRequest().authenticated());
 
         http.addFilter(new JWTAuthenticationFilter(authenticationManager(http.getSharedObject(AuthenticationConfiguration.class))));
 
